@@ -10,7 +10,7 @@
     <!-- Main Content -->
     <main class="flex-1 flex items-center justify-center p-4">
       <div class="w-full max-w-md flex justify-center">
-        <div class="rounded-xl border shadow-md bg-white overflow-hidden shadow-lg border-t-4 border-primary">
+        <div class="rounded-xl border bg-white overflow-hidden shadow-lg border-t-4 border-primary">
           <div class="px-8 pt-8 flex flex-col items-center bg-gradient-to-r from-primary/10 to-secondary/10">
             <h1 class="text-2xl font-bold mb-2 text-center">{{ isLogin ? 'Connexion' : 'Inscription' }}</h1>
             <p class="text-gray-600 mb-6 text-center">
