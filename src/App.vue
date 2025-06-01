@@ -1,7 +1,7 @@
 <script setup>
-import Auth from '@/page/Auth.vue' // PAS de accolades
+// Suppression de l'import direct de Auth
 </script>
 
 <template>
-  <Auth />
+  <RouterView />
 </template>
