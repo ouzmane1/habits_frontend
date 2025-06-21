@@ -120,6 +120,15 @@ class AuthService {
   getCurrentUser() {
     return JSON.parse(localStorage.getItem('user'));
   }
+  
+  async getUserInfo() {
+    try {
+      const response = await axios.get(`${API_URL}/me`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des infos utilisateur');
+    }
+  }
 }
 
 export default new AuthService(); 

@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white flex flex-col">
     <!-- Header -->
     <div class="h-16 bg-white flex items-center px-6">
-      <RouterLink to="/" class="font-bold text-xl text-emerald-600">
+      <RouterLink to="/" class="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
         Habits
       </RouterLink>
     </div>
@@ -176,6 +176,7 @@ const handleSubmit = async (e: Event) => {
       // Appelle ton AuthService.login pour la connexion
       await AuthService.login(formData.email, formData.password)
       console.log('Login successful')
+      console.log('Utilisateur connecté:', AuthService.getUserInfo())
       // Redirection après succès de la connexion
       // router.push('/mes-taches') // Décommenter pour rediriger
     } else {
@@ -192,7 +193,7 @@ const handleSubmit = async (e: Event) => {
 
     // Redirection générique ou autre action après succès
     // Par exemple, rediriger toujours vers '/mes-taches' après connexion ou inscription
-    router.push('/dashboard');
+    router.push('/');
 
   } catch (err: any) {
     console.error('Auth error:', err)
