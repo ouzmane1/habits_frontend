@@ -1,4 +1,5 @@
 import axios from 'axios';
+import router from '@/router';
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -55,6 +56,11 @@ class AuthService {
             this.logout();
             return Promise.reject(refreshError);
           }
+        }
+
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem('user');
+          router.push('/auth');
         }
 
         return Promise.reject(error);
@@ -119,6 +125,15 @@ class AuthService {
 
   getCurrentUser() {
     return JSON.parse(localStorage.getItem('user'));
+  }
+  
+  async getUserInfo() {
+    try {
+      const response = await axios.get(`${API_URL}/me`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erreur lors de la récupération des infos utilisateur');
+    }
   }
 }
 
