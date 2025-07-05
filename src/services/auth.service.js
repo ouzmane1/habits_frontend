@@ -1,4 +1,5 @@
 import axios from 'axios';
+import router from '@/router';
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -55,6 +56,11 @@ class AuthService {
             this.logout();
             return Promise.reject(refreshError);
           }
+        }
+
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem('user');
+          router.push('/auth');
         }
 
         return Promise.reject(error);

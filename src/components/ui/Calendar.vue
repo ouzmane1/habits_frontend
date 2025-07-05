@@ -58,7 +58,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed, defineProps, defineEmits } from 'vue'
+  import { ref, computed, defineProps, defineEmits, watch } from 'vue'
   import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
   
   interface Props {
@@ -71,9 +71,15 @@
     select: [date: Date]
   }>()
   
-  const currentDate = ref(new Date())
   const currentMonth = ref(new Date().getMonth())
   const currentYear = ref(new Date().getFullYear())
+  
+  watch(() => props.selected, (newDate) => {
+    if (newDate) {
+      currentMonth.value = newDate.getMonth()
+      currentYear.value = newDate.getFullYear()
+    }
+  }, { immediate: true })
   
   const daysOfWeek = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
   
@@ -119,9 +125,15 @@
   })
   
   const selectDate = (date: Date | null) => {
-    if (date) {
+    if (date && !isDateDisabled(date)) {
       emit('select', date)
     }
+  }
+  
+  const isDateDisabled = (date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date < today
   }
   
   const previousMonth = () => {
@@ -149,8 +161,15 @@
     const isToday = day.toDateString() === today.toDateString()
     const isSelected = props.selected && day.toDateString() === props.selected.toDateString()
     const isCurrentMonth = day.getMonth() === currentMonth.value
+    const isDisabled = isDateDisabled(day)
     
-    let classes = 'hover:bg-accent hover:text-accent-foreground rounded-md transition-colors'
+    let classes = 'rounded-md transition-colors'
+    
+    if (isDisabled) {
+      classes += ' text-muted-foreground opacity-30 cursor-not-allowed'
+    } else {
+      classes += ' hover:bg-accent hover:text-accent-foreground'
+    }
     
     if (isSelected) {
       classes += ' bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'

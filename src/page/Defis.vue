@@ -1,12 +1,33 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
     <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Defis disponibles</h1>
-        <p class="text-gray-600 text-lg">
-          Relevez des defis pour booster votre motivation et gagner des points !
-        </p>
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 mb-4">Défis disponibles</h1>
+          <p class="text-gray-600 text-lg">
+            Relevez des défis pour booster votre motivation et gagner des points !
+          </p>
+        </div>
+        <Button @click="isAddDefiDialogOpen = true" class="bg-emerald-600 hover:bg-emerald-700 text-white">
+          Créer un défi
+        </Button>
       </div>
+      
+      <AddDefiDialog :open="isAddDefiDialogOpen" @update:open="isAddDefiDialogOpen = $event" @created="handleDefiCreated"/>
+
+      <EditDefiDialog 
+        :open="isEditDialogOpen" 
+        :defiToEdit="defiToEdit" 
+        @update:open="isEditDialogOpen = $event" 
+        @updated="handleDefiUpdated"
+      />
+
+      <ConfirmDialog 
+        :open="isConfirmDialogOpen" 
+        :itemToDelete="defiToDelete" 
+        @update:open="isConfirmDialogOpen = $event" 
+        @deleted="handleDefiDeleted"
+      />
 
       <!-- Etat de chargement -->
       <div v-if="loading" class="flex justify-center items-center py-12">
@@ -31,7 +52,8 @@
         <Card
           v-for="challenge in challenges"
           :key="challenge.id"
-          class="p-6 hover:shadow-lg transition-all duration-200"
+          class="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          @click="viewDefiDetail(challenge)"
         >
           <div class="flex items-start justify-between mb-4">
             <div class="flex gap-2">
@@ -41,6 +63,15 @@
               <Badge variant="outline" :class="getDifficultyColor(challenge.difficulty)">
                 {{ challenge.difficulty }}
               </Badge>
+            </div>
+
+            <div class="flex items-center gap-2" @click.stop>
+                <button @click="editDefi(challenge)" class="text-blue-500 hover:text-blue-700">
+                    <Pencil size="18" />
+                </button>
+                <button @click="deleteDefi(challenge)" class="text-red-500 hover:text-red-700">
+                    <Trash size="18" />
+                </button>
             </div>
 
             <Badge v-if="challenge.isActive" class="bg-blue-100 text-blue-700">
@@ -63,12 +94,12 @@
           <div v-if="challenge.isActive" class="mb-4">
             <div class="flex justify-between text-sm mb-2">
               <span class="text-gray-600">Progression</span>
-              <span class="font-medium text-blue-600">{{ challenge.progress }}%</span>
+              <span class="font-medium text-blue-600">{{ formatProgress(challenge.progress) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div
                 class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                :style="{ width: challenge.progress + '%' }"
+                :style="{ width: `${Math.min(100, Math.max(0, formatProgress(challenge.progress)))}%` }"
               ></div>
             </div>
           </div>
@@ -76,7 +107,7 @@
           <div class="space-y-3 mb-6">
             <div class="flex items-center gap-2 text-sm text-gray-600">
               <Timer :size="16" />
-              <span>{{ challenge.duration }}</span>
+              <span>{{ challenge.days_remaining }} jours</span>
             </div>
 
             <div class="flex items-center gap-2 text-sm text-gray-600">
@@ -86,12 +117,12 @@
 
             <div class="flex items-center gap-2 text-sm text-gray-600">
               <Trophy :size="16" />
-              <span>{{ challenge.reward }} points de recompense</span>
+              <span>{{ challenge.total_points }} points de recompense</span>
             </div>
           </div>
 
           <Button
-            class="w-full"
+            class="w-full text-white"
             :class="[
               challenge.isActive
                 ? 'bg-blue-600 hover:bg-blue-700'
@@ -100,6 +131,7 @@
                 : 'bg-emerald-600 hover:bg-emerald-700'
             ]"
             :disabled="challenge.progress === 100"
+            @click.stop="handleJoinDefi(challenge)"
           >
             {{
               challenge.isActive
@@ -126,15 +158,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 import Badge from '@/components/ui/Badge.vue'
-import { Users, Trophy, Timer } from 'lucide-vue-next'
+import { Users, Trophy, Timer, Pencil, Trash } from 'lucide-vue-next'
 import DefiService from '@/services/defi.service.js'
+import AddDefiDialog from '@/components/AddDefiDialog.vue'
+import EditDefiDialog from '@/components/EditDefiDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
+const router = useRouter()
 const challenges = ref([])
 const loading = ref(true)
 const error = ref('')
+const isAddDefiDialogOpen = ref(false)
+
+const isEditDialogOpen = ref(false)
+const defiToEdit = ref(null)
+
+const isConfirmDialogOpen = ref(false)
+const defiToDelete = ref(null)
 
 const loadDefis = async () => {
   try {
@@ -143,7 +187,31 @@ const loadDefis = async () => {
     error.value = ''
     const defisData = await DefiService.getDefis()
     console.log('Defis recus:', defisData)
-    challenges.value = defisData || []
+    
+    // Récupérer la progression pour chaque défi actif
+    const defisWithProgress = await Promise.all(
+      defisData.map(async (defi) => {
+        if (defi.isActive) {
+          try {
+            const progressData = await DefiService.getProgress(defi.id)
+            return {
+              ...defi,
+              progress: progressData.progress || 0
+            }
+          } catch (error) {
+            console.error(`Erreur lors de la récupération de la progression pour le défi ${defi.id}:`, error)
+            return {
+              ...defi,
+              progress: 0
+            }
+          }
+        }
+        return defi
+      })
+    )
+    
+    challenges.value = defisWithProgress || []
+    console.log('defis avec progression:', challenges.value)
   } catch (err) {
     console.error('Erreur lors du chargement des defis:', err)
     error.value = 'Erreur lors du chargement des defis'
@@ -151,6 +219,35 @@ const loadDefis = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleDefiCreated = () => {
+  isAddDefiDialogOpen.value = false
+  loadDefis()
+}
+
+const editDefi = (challenge) => {
+  defiToEdit.value = challenge
+  isEditDialogOpen.value = true
+}
+
+const handleDefiUpdated = () => {
+  isEditDialogOpen.value = false
+  loadDefis()
+}
+
+const deleteDefi = (challenge) => {
+  defiToDelete.value = {
+    id: challenge.id,
+    title: challenge.title,
+    type: 'defi'
+  }
+  isConfirmDialogOpen.value = true
+}
+
+const handleDefiDeleted = () => {
+  isConfirmDialogOpen.value = false
+  loadDefis()
 }
 
 const getDifficultyColor = (difficulty) => {
@@ -171,6 +268,34 @@ const getCategoryColor = (category) => {
     case 'Developpement': return 'bg-indigo-100 text-indigo-700'
     default: return 'bg-gray-100 text-gray-700'
   }
+}
+
+const viewDefiDetail = (challenge) => {
+  router.push({
+    name: 'DefisDetail',
+    params: { id: challenge.id },
+    state: { challenge: challenge }
+  })
+}
+
+const handleJoinDefi = async (challenge) => {
+  try {
+    await DefiService.joinDefi(challenge.id)
+    await loadDefis()
+  } catch (err) {
+    if (err.response && err.response.data) {
+      console.error('Erreur API:', err.response.data)
+    }
+    alert('Erreur lors de la participation au défi.')
+  }
+}
+
+const formatProgress = (progress) => {
+  if (!progress) return 0
+  // Convertir en nombre si c'est une chaîne
+  const numProgress = parseFloat(progress)
+  // S'assurer que c'est un nombre valide et le limiter entre 0 et 100
+  return Math.min(100, Math.max(0, isNaN(numProgress) ? 0 : numProgress))
 }
 
 onMounted(() => {

@@ -6,6 +6,7 @@ const Auth = () => import('@/page/Auth.vue')
 const Accueil = () => import('@/page/Accueil.vue')
 const MesTaches = () => import('@/page/MesTaches.vue')
 const Defis = () => import('@/page/Defis.vue')
+const DefisDetail = () => import('@/page/DefisDetail.vue')
 const Badges = () => import('@/page/Badges.vue')
 
 const router = createRouter({
@@ -37,6 +38,12 @@ const router = createRouter({
       path: '/defis',
       name: 'defis',
       component: Defis,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/defis/:id',
+      name: 'DefisDetail',
+      component: DefisDetail,
       meta: { requiresAuth: true }
     },
     {

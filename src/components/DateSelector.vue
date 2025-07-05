@@ -20,7 +20,7 @@
         <!-- Calendar Popup -->
         <div 
           v-if="isOpen" 
-          class="absolute z-50 mt-1 w-auto p-0 bg-white border rounded-md shadow-lg"
+          class="absolute z-50 bottom-full mb-1 w-auto p-0 bg-white border rounded-md shadow-lg"
           @click.stop
         >
           <Calendar
@@ -34,7 +34,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, defineProps, defineEmits } from 'vue'
+  import { ref, defineProps, defineEmits, watch } from 'vue'
   import { CalendarIcon } from 'lucide-vue-next'
   import Calendar from './ui/Calendar.vue'
   
@@ -54,6 +54,10 @@
   
   const isOpen = ref(false)
   const selectedDate = ref<Date | undefined>(props.modelValue)
+  
+  watch(() => props.modelValue, (newDate) => {
+    selectedDate.value = newDate
+  })
   
   const toggleCalendar = () => {
     isOpen.value = !isOpen.value

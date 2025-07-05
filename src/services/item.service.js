@@ -97,6 +97,46 @@ class ItemService {
       throw error;
     }
   }
+
+  async getTodaytask() {
+    try {
+      const response = await axios.get(`${API_URL}/today/tasks`);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des taches d'aujourd'hui ", error);
+      throw error;
+    }
+  }
+
+  async logTaskDay(type, id) {
+    try {
+      const response = await axios.post(`${API_URL}/tasks/${type}/${id}/log-day`);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du log de la tâche:", error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  async deleteTaskLog(type, id) {
+    try {
+      const response = await axios.delete(`${API_URL}/tasks/${type}/${id}/log-day`);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la suppression du log de la tâche:", error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  async getCompletedtask() {
+    try {
+      const response = await axios.get(`${API_URL}/user/completed-tasks`);
+      return response.data;
+    } catch (error) {
+      console.log("Erreur lors de la récupération des taches complétées: ", error);
+      throw error;
+    }
+  }
 }
 
 export default new ItemService(); 

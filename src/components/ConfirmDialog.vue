@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { ref, computed, defineProps, defineEmits } from 'vue'
 import ItemService from '@/services/item.service.js'
+import DefiService from '@/services/defi.service.js'
 
 interface Props {
   open: boolean
@@ -52,7 +53,7 @@ interface Props {
     id: number
     title?: string
     titre?: string
-    type: 'habit' | 'objective'
+    type: 'habit' | 'objective' | 'defi'
   } | null
 }
 
@@ -80,8 +81,10 @@ const confirmDelete = async () => {
   try {
     if (props.itemToDelete.type === 'habit') {
       await ItemService.deleteHabit(props.itemToDelete.id)
-    } else {
+    } else if (props.itemToDelete.type === 'objective') {
       await ItemService.deleteObjective(props.itemToDelete.id)
+    } else if (props.itemToDelete.type === 'defi') {
+      await DefiService.deleteDefi(props.itemToDelete.id)
     }
     
     emit('deleted')
