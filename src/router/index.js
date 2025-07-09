@@ -8,6 +8,7 @@ const MesTaches = () => import('@/page/MesTaches.vue')
 const Defis = () => import('@/page/Defis.vue')
 const DefisDetail = () => import('@/page/DefisDetail.vue')
 const Badges = () => import('@/page/Badges.vue')
+const Profil = () => import('@/page/Profil.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,12 @@ const router = createRouter({
       path: '/badges',
       name: 'badges',
       component: Badges,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profil',
+      name: 'profil',
+      component: Profil,
       meta: { requiresAuth: true }
     }
   ]

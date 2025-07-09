@@ -2,9 +2,9 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 mb-4">Collection de Badges</h1>
-          <div class="flex items-center gap-4">
-            <p class="text-gray-600 text-lg">
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4">Collection de Badges</h1>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <p class="text-gray-600 text-base sm:text-lg">
               Collectionnez des badges en accomplissant vos objectifs !
             </p>
             <div class="flex items-center gap-2">
@@ -37,7 +37,7 @@
         <div v-else>
           <!-- Badges débloqués -->
           <div class="mb-12" v-if="unlockedBadges.length > 0">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+            <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
               <Trophy class="text-amber-500" size="28" />
               Badges Débloqués
             </h2>
@@ -50,14 +50,10 @@
                   </div>
                 </div>
     
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ badge.title }}</h3>
-                <p class="text-sm text-gray-600 mb-4">{{ badge.description }}</p>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2">{{ badge.title }}</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">{{ badge.description }}</p>
     
-                <div class="flex flex-wrap gap-2 justify-center mb-3">
-                  <Badge :class="getRarityColor(badge.rarity)">
-                    {{ badge.code }}
-                  </Badge>
-                </div>
+                
     
                 <p class="text-xs text-emerald-600 font-medium">
                   Débloqué {{ formatDate(getUnlockedDate(badge.id)) }}
@@ -68,7 +64,7 @@
     
           <!-- Badges à débloquer -->
           <div v-if="lockedBadges.length > 0">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+            <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
               <Target class="text-gray-500" size="28" />
               Badges à Débloquer
             </h2>
@@ -81,14 +77,10 @@
                   </div>
                 </div>
     
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">{{ badge.title }}</h3>
-                <p class="text-sm text-gray-500 mb-4">{{ badge.description }}</p>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-600 mb-2">{{ badge.title }}</h3>
+                <p class="text-xs sm:text-sm text-gray-500 mb-4">{{ badge.description }}</p>
     
-                <div class="flex flex-wrap gap-2 justify-center mb-3">
-                  <Badge variant="outline" :class="getRarityColor(badge.rarity)">
-                    {{ badge.code }}
-                  </Badge>
-                </div>
+              
     
                 <p class="text-xs text-gray-400 font-medium">
                   🔒 À débloquer
@@ -101,7 +93,7 @@
           <div v-if="badges.length === 0" class="text-center py-12">
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
               <div class="text-gray-400 text-4xl mb-4">📭</div>
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Aucun badge disponible</h3>
+              <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2">Aucun badge disponible</h3>
               <p class="text-gray-600">Les badges apparaîtront ici une fois qu'ils seront créés.</p>
             </div>
           </div>

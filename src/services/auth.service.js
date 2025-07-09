@@ -3,6 +3,14 @@ import router from '@/router';
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return {};
+  }
+}
+
 class AuthService {
   constructor() {
     // Configuration des intercepteurs axios
@@ -57,12 +65,10 @@ class AuthService {
             return Promise.reject(refreshError);
           }
         }
-
         if (error.response && error.response.status === 401) {
           localStorage.removeItem('user');
           router.push('/auth');
         }
-
         return Promise.reject(error);
       }
     );
@@ -80,19 +86,21 @@ class AuthService {
       });
 
       const { token, refresh_token } = response.data;
+      const payload = parseJwt(token);
+      const roles = payload.roles || [];
 
       // Stockage des informations utilisateur
       const user = {
         token,
         refreshToken: refresh_token,
-        email: email
+        email: email,
+        role: roles
       };
       localStorage.setItem('user', JSON.stringify(user));
 
       return response.data;
     } catch (error) {
       console.error('Erreur de connexion:', error);
-      // Essayer d'extraire un message d'erreur plus spécifique du backend
       const errorMessage = error.response?.data?.detail || error.message || 'Erreur inconnue lors de la connexion';
       throw new Error(errorMessage);
     }
@@ -109,8 +117,7 @@ class AuthService {
       return response.data;
     } catch (error) {
       console.error('Erreur d\'inscription:', error);
-      // Relaye l'erreur complète pour traitement côté frontend
-      throw error; // <-- c'est tout !
+      throw error; 
     }
   }
 

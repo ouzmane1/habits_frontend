@@ -9,7 +9,25 @@
           Habits
         </RouterLink>
 
-        <div class="flex items-center space-x-8">
+        <!-- Bouton burger visible sur mobile -->
+        <button
+          class="md:hidden flex flex-col justify-center items-center w-10 h-10 focus:outline-none"
+          @click="isMenuOpen = !isMenuOpen"
+          aria-label="Ouvrir le menu"
+        >
+          <span :class="[isMenuOpen ? 'rotate-45 translate-y-2' : '', 'block w-6 h-0.5 bg-gray-800 transition-all duration-300 mb-1']"></span>
+          <span :class="[isMenuOpen ? 'opacity-0' : '', 'block w-6 h-0.5 bg-gray-800 transition-all duration-300 mb-1']"></span>
+          <span :class="[isMenuOpen ? '-rotate-45 -translate-y-2' : '', 'block w-6 h-0.5 bg-gray-800 transition-all duration-300']"></span>
+        </button>
+
+        <!-- Menu de navigation -->
+        <div
+          class="items-center md:flex md:flex-row md:space-x-8 md:static md:w-auto transition-all duration-300 z-40"
+          :class="[
+            isMenuOpen ? 'flex flex-col absolute top-16 right-0 w-3/4 max-w-xs bg-white shadow-lg' : 'hidden',
+            'md:flex md:flex-row md:relative md:bg-transparent md:shadow-none'
+          ]"
+        >
           <RouterLink
             v-for="item in navItems"
             :key="item.path"
@@ -19,6 +37,7 @@
               'bg-emerald-100 text-emerald-700 font-medium': isActive(item.path),
               'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50': !isActive(item.path)
             }"
+            @click="isMenuOpen = false"
           >
             <component :is="item.icon" :size="20" />
             <span>{{ item.label }}</span>
@@ -29,9 +48,7 @@
             <button class="relative p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200">
               <Bell :size="20" />
               <!-- Badge de notification (optionnel) -->
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
+              
             </button>
 
             <!-- Menu utilisateur -->
@@ -95,6 +112,7 @@ import Button from '@/components/ui/Button.vue'
 import AuthService from '@/services/auth.service'
 import DropdownMenu from './ui/DropdownMenu.vue'
 import Avatar from './ui/Avatar.vue'
+import { ref } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -114,7 +132,30 @@ const handleLogout = () => {
 }
 
 const handleProfile = () => {
-  console.log('Aller au profil')
-  // Navigation vers le profil à implémenter
+  router.push('/profil')
 }
+
+const isMenuOpen = ref(false)
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 0;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  .ml-6 {
+    margin-left: 0 !important;
+  }
+  .border-l {
+    border-left: none !important;
+  }
+  .pl-6 {
+    padding-left: 0 !important;
+  }
+  .max-w-xs {
+    max-width: 12rem;
+  }
+}
+</style>

@@ -1,14 +1,16 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
     <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="flex justify-between items-center mb-8">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-800 mb-4">Défis disponibles</h1>
-          <p class="text-gray-600 text-lg">
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4">Défis disponibles</h1>
+          <p class="text-gray-600 text-base sm:text-lg">
             Relevez des défis pour booster votre motivation et gagner des points !
           </p>
         </div>
-        <Button @click="isAddDefiDialogOpen = true" class="bg-emerald-600 hover:bg-emerald-700 text-white">
+        <Button
+          v-if="isAdmin"
+          @click="isAddDefiDialogOpen = true" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base w-full sm:w-auto mt-4 sm:mt-0 text-center">
           Créer un défi
         </Button>
       </div>
@@ -56,20 +58,12 @@
           @click="viewDefiDetail(challenge)"
         >
           <div class="flex items-start justify-between mb-4">
-            <div class="flex gap-2">
-              <Badge :class="getCategoryColor(challenge.category)">
-                {{ challenge.category }}
-              </Badge>
-              <Badge variant="outline" :class="getDifficultyColor(challenge.difficulty)">
-                {{ challenge.difficulty }}
-              </Badge>
-            </div>
 
             <div class="flex items-center gap-2" @click.stop>
-                <button @click="editDefi(challenge)" class="text-blue-500 hover:text-blue-700">
+                <button v-if="isAdmin" @click="editDefi(challenge)" class="text-blue-500 hover:text-blue-700">
                     <Pencil size="18" />
                 </button>
-                <button @click="deleteDefi(challenge)" class="text-red-500 hover:text-red-700">
+                <button v-if="isAdmin" @click="deleteDefi(challenge)" class="text-red-500 hover:text-red-700">
                     <Trash size="18" />
                 </button>
             </div>
@@ -179,6 +173,11 @@ const defiToEdit = ref(null)
 
 const isConfirmDialogOpen = ref(false)
 const defiToDelete = ref(null)
+
+// Récupération du rôle admin (robuste)
+const user = JSON.parse(localStorage.getItem('user') || '{}')
+const roles = Array.isArray(user.role) ? user.role : (typeof user.role === 'string' ? [user.role] : [])
+const isAdmin = roles.includes('ROLE_ADMIN')
 
 const loadDefis = async () => {
   try {
